@@ -1,4 +1,21 @@
 # import Post from "./generated/prisma.graphql"
+# import Role from "./generated/prisma.graphql"
+
+enum Operator {
+  ALL,
+  ONE,
+}
+
+directive @auth(
+  requires: Permission,
+  opType: Operator = ALL,
+  """
+  If the user has this permission the directive
+  will allow accessing with without check requires.
+  """
+  permissionAll: Permission = PERMISSION_ALL,
+) on OBJECT | FIELD_DEFINITION
+
 
 type Query {
   feed: [Post!]!
@@ -13,6 +30,18 @@ type Mutation {
   createDraft(title: String!, text: String!): Post!
   publish(id: ID!): Post!
   deletePost(id: ID!): Post!
+
+  createRole(
+    name: String!,
+    description: String!,
+  ): Role
+  updateRole(
+    id: ID!,
+    name: String,
+    description: String,
+    permissions: [Permission!],
+  ): Role
+  deleteRole(id: ID!): Role
 }
 
 type Subscription {
@@ -29,4 +58,32 @@ type User {
   email: String!
   name: String!
   posts: [Post!]!
+}
+
+enum Permission {
+  """
+  This permission allows the user to everything on this system.
+  """
+  PERMISSION_ALL
+
+  """
+  All permission on posts
+  """
+  POST_ALL
+  """
+  Edit a post
+  """
+  POST_EDIT
+  """
+  view a post
+  """
+  POST_VIEW
+  """
+  create a post
+  """
+  POST_CREATE
+  """
+  delete a post
+  """
+  POST_DELETE
 }
