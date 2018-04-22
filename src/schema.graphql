@@ -59,6 +59,7 @@ type User {
   id: ID!
   email: String!
   name: String!
+  isTikier: Boolean!
   permissions: [Permission!]!
   posts: [Post!]!
 }
