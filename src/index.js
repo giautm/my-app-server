@@ -3,12 +3,14 @@ const { Prisma } = require('prisma-binding')
 const resolvers = require('./resolvers')
 const { formatError } = require('apollo-errors');
 const { AuthDirective } = require('./directives/auth');
+const { RelayIdDirective } = require('./directives/relay-id');
 
 const server = new GraphQLServer({
   typeDefs: 'src/schema.graphql',
   resolvers,
   schemaDirectives: {
     auth: AuthDirective,
+    relayID: RelayIdDirective,
   },
   context: req => ({
     ...req,
