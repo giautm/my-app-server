@@ -8,12 +8,12 @@ enum Operator {
 
 directive @auth(
   requires: [Permission],
-  opType: Operator = ALL,
+  opType: Operator = ONE,
   """
   If the user has this permission the directive
   will allow accessing with without check requires.
   """
-  permissionAll: Permission = PERMISSION_ALL,
+  permissionAll: Permission = ADMINISTRATOR,
 ) on OBJECT | FIELD_DEFINITION
 
 directive @relayID(
@@ -41,8 +41,8 @@ type Mutation {
   publish(id: ID!): Post!
   deletePost(id: ID!): Post!
 
-  updateUserRole(id: ID! @relayID(type: "User"), roles: [ID!]! @relayID(type: "Role")): User!
-  updateUserGroup(id: ID!, groups: [ID!]!): User!
+  updateUserRole(id: ID!, roles: [ID!]!): User! @auth(requires: [PERMISSION_ALL])
+  updateUserGroup(id: ID!, groups: [ID!]!): User! @auth(requires: [PERMISSION_ALL])
   createRole(
     name: String!,
     description: String!,
@@ -66,7 +66,7 @@ type AuthPayload {
 }
 
 type User {
-  id: ID! @relayID
+  id: ID!
   email: String!
   name: String!
   isTikier: Boolean!

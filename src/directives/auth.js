@@ -12,6 +12,23 @@ const NotAuthorizedOne = createError('NotAuthorized', {
   message: 'Not authorized, required ONE of the permissions',
 });
 
+const checkers = {
+  ALL: (perms, requiredPerms) => {
+    if (Array.isArray(perms) && requiredPerms.every(p => perms.includes(p))) {
+      return;
+    }
+
+    throw new NotAuthorizedAll({ data: { requiredPerms } });
+  },
+  ONE: (perms, requiredPerms) =>{
+    if (Array.isArray(perms) && requiredPerms.some(p => perms.includes(p))) {
+      return;
+    }
+
+    throw new NotAuthorizedOne({ data: { requiredPerms } });
+  },
+}
+
 class AuthDirective extends SchemaDirectiveVisitor {
 
   visitFieldDefinition(field, details) {
@@ -42,7 +59,7 @@ class AuthDirective extends SchemaDirectiveVisitor {
         // to the objectType if no Permissions is required by the field:
         const {
           _requiredPerms: requiredPerms,
-          _permsTypeName: opName = 'ALL',
+          _permsTypeName: opName = 'ONE',
           _permissionAll: permissionAll,
         } = (field._requiredPerms) ? field : objectType;
         if (!requiredPerms) {
@@ -52,31 +69,15 @@ class AuthDirective extends SchemaDirectiveVisitor {
         const context = args[2];
         const getPerms = context[UserPerms];
         if (typeof(getPerms) === 'function') {
-          const perms = await getPermsAsync();
+          const perms = await getPerms();
           if (!permissionAll || !perms.includes(permissionAll)) {
-            this[`_check${opName}`](perms, requiredPerms);
+            checkers[opName](perms, requiredPerms);
           }
         }
 
         return resolve.apply(this, args);
       };
     });
-  }
-
-  _checkALL(perms, requiredPerms) {
-    if (Array.isArray(perms) && requiredPerms.every(p => perms.includes(p))) {
-      return;
-    }
-
-    throw new NotAuthorizedAll({ requiredPerms });
-  }
-
-  _checkONE(perms, requiredPerms) {
-    if (Array.isArray(perms) && requiredPerms.some(p => perms.includes(p))) {
-      return;
-    }
-
-    throw new NotAuthorizedOne({ requiredPerms });
   }
 }
 
