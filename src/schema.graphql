@@ -39,21 +39,24 @@ type Mutation {
   login(email: String!, password: String!): AuthPayload!
   createDraft(title: String!, text: String!): Post!
   publish(id: ID!): Post!
-  deletePost(id: ID!): Post!
+  deletePost(id: ID!): Post! @auth(requires: [POST_ALL, POST_DELETE])
 
   updateUserRole(id: ID!, roles: [ID!]!): User! @auth(requires: [PERMISSION_ALL])
   updateUserGroup(id: ID!, groups: [ID!]!): User! @auth(requires: [PERMISSION_ALL])
+
   createRole(
     name: String!,
     description: String!,
-  ): Role
+  ): Role @auth(requires: [ROLE_ALL, ROLE_CREATE])
   updateRole(
     id: ID!,
     name: String,
     description: String,
     permissions: [Permission!],
-  ): Role
-  deleteRole(id: ID!): Role
+  ): Role @auth(requires: [ROLE_ALL, ROLE_UPDATE])
+  deleteRole(
+    id: ID!,
+  ): Role @auth(requires: [ROLE_ALL, ROLE_DELETE])
 }
 
 type Subscription {
@@ -75,12 +78,17 @@ type User {
 }
 
 enum Permission {
-  ADMINISTRATOR
   """
   This permission allows the user to everything on this system.
   """
+  ADMINISTRATOR
+
   PERMISSION_ALL
 
+  ROLE_ALL
+  ROLE_CREATE
+  ROLE_UPDATE
+  ROLE_DELETE
   """
   All permission on posts
   """
