@@ -39,7 +39,7 @@ type Mutation {
   publish(id: ID!): Post!
   deletePost(id: ID!): Post!
 
-  updateUserRole(id: ID!, roles: [ID!]!): User!
+  updateUserRole(id: ID! @relayID(type: "User"), roles: [ID!]! @relayID(type: "Role")): User!
   updateUserGroup(id: ID!, groups: [ID!]!): User!
   createRole(
     name: String!,

@@ -12,10 +12,19 @@ const {
 
 class RelayIdDirective extends SchemaDirectiveVisitor {
 
+  visitArgumentDefinition(arg, details) {
+    if (!this.args.type) {
+      throw new Error('Argument "type" is required for the argument "'
+        + arg.name + '" on "' + details.field.name + '"');
+    }
+    arg.type = this.wrapType(arg.type,
+      this.args.type);
+  }
+
   visitInputFieldDefinition(field, details) {
     if (!this.args.type) {
       throw new Error('Argument "type" is required for the Input field on '
-        + details.objectType);
+        + '"' + details.objectType + '"');
     }
     field.type = this.wrapType(field.type,
       this.args.type);
@@ -26,25 +35,25 @@ class RelayIdDirective extends SchemaDirectiveVisitor {
       this.args.type || details.objectType);
   }
 
-  wrapType(type, typeName) {
-    if (type instanceof GraphQLNonNull) {
+  wrapType(base, typeName) {
+    if (base instanceof GraphQLNonNull) {
       return new GraphQLNonNull(
-        this.wrapType(type.ofType, typeName));
-    } else if (type instanceof GraphQLList) {
+        this.wrapType(base.ofType, typeName));
+    } else if (base instanceof GraphQLList) {
       return new GraphQLList(
-        this.wrapType(type.ofType, typeName));
-    } else if (type instanceof GraphQLScalarType) {
-      return new GraphQLRelayID(type, typeName);
+        this.wrapType(base.ofType, typeName));
+    } else if (base instanceof GraphQLScalarType) {
+      return new GraphQLGlobalID(base, typeName);
     }
 
-    throw new Error(`Not a scalar type: ${type}`);
+    throw new Error(`Not a scalar type: ${base}`);
   }
 }
 
-class GraphQLRelayID extends GraphQLScalarType {
+class GraphQLGlobalID extends GraphQLScalarType {
   constructor(base, typeName) {
     super({
-      name: `GraphQLRelayID`,
+      name: `GraphQLGlobalID`,
 
       serialize(value) {
         value = base.serialize(value);
@@ -60,11 +69,11 @@ class GraphQLRelayID extends GraphQLScalarType {
       },
 
       parseLiteral(ast) {
-        const { type, id } = fromGlobalId(ast);
+        const { type, id } = fromGlobalId(ast.value);
         if (type !== typeName) {
           throw new Error(`RelayID: Invalid type ${type}, expected: ${typeName}`);
         }
-        return base.parseLiteral(id);
+        return id;
       }
     });
   }
