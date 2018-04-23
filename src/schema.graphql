@@ -18,7 +18,9 @@ directive @auth(
 
 directive @relayID(
   type: String,
-) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+) on ARGUMENT_DEFINITION
+  | FIELD_DEFINITION
+  | INPUT_FIELD_DEFINITION
 
 type Query {
   feed: [Post!]!
