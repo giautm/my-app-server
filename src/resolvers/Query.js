@@ -1,4 +1,4 @@
-const { getUserId } = require('../utils')
+const { getUserId } = require('../utils/jwt')
 
 const Query = {
   feed(parent, args, ctx, info) {

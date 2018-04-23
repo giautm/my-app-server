@@ -1,4 +1,4 @@
-const { getUserId } = require('../../utils')
+const { getUserId } = require('../../utils/jwt')
 
 const post = {
   async createDraft(parent, { title, text }, ctx, info) {

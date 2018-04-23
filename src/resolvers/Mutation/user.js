@@ -1,4 +1,4 @@
-const { getUserId } = require('../../utils')
+const { getUserId } = require('../../utils/jwt')
 
 const connect = (ids) => ({
   connect: ids.map(id => ({ id })),

@@ -1,7 +1,7 @@
 
 const { Prisma } = require('prisma-binding')
 const { UserPerms } = require('./directives/auth');
-const { getUserId } = require('./utils')
+const { getUserId } = require('./utils/jwt');
 const { getUserPermissionsAsync } =  require('./utils/permissions');
 
 class Context {
@@ -14,12 +14,19 @@ class Context {
       debug: true,                              // log all GraphQL queries & mutations
     });
 
+    this.initUser();
     this[UserPerms] = this[UserPerms].bind(this);
   }
 
+  initUser() {
+    try {
+      this.userId = getUserId(this.params);
+    } catch (err) {
+    }
+  }
+
   [UserPerms]() {
-    const userId = getUserId(this.params);
-    return getUserPermissionsAsync(this, userId);
+    return getUserPermissionsAsync(this, this.userId);
   }
 }
 
