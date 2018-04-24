@@ -1,5 +1,9 @@
 const union = require('lodash/union');
 
+const {
+  cachingDecorator,
+} = require('./cache');
+
 const rolePermissions = ({ roles }) =>
   roles.reduce((p, r) => union(p, r.permissions), []);
 const userPermissions = (user) =>
@@ -35,5 +39,6 @@ const getUserPermissionsAsync = async (ctx, id) => {
 }
 
 module.exports = { 
-  getUserPermissionsAsync,
+  getUserPermissionsAsync: cachingDecorator(getUserPermissionsAsync,
+    (args) => `permissions_${args[1]}`),
 };
