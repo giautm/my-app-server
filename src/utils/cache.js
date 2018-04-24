@@ -14,9 +14,9 @@ function cachingDecorator(func, cacheKey = defaultCacheKey) {
 
     const result = func.call(this, ...args);
     if (result instanceof Promise) {
-      return result.then(v => {
-        cache.set(key, v);
-        return v;
+      return result.then(value => {
+        cache.set(key, value);
+        return value;
       });
     } else {
       cache.set(key, result);
